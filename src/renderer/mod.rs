@@ -7,12 +7,12 @@ use glium;
 use glium::{ Display, Surface };
 use glium::texture::{ Texture2d, ClientFormat, RawImage2d };
 
-use tile_net::TileNet;
+use tile_net;
 
 
-pub struct Renderer<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
+pub struct TileNet<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
     display: &'a Display,
-    net: &'a TileNet<T>,
+    net: &'a tile_net::TileNet<T>,
 
     // OpenGL 
     shader_prg: glium::Program,
@@ -20,9 +20,9 @@ pub struct Renderer<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
     texture: Texture2d,
 }
 
-impl<'a, T> Renderer<'a, T>
+impl<'a, T> TileNet<'a, T>
 where T: Clone + glium::texture::PixelValue {
-    pub fn new(display: &'a Display, net: &'a TileNet<T>) -> Renderer<'a, T> {
+    pub fn new(display: &'a Display, net: &'a tile_net::TileNet<T>) -> TileNet<'a, T> {
         let shader_prg = create_program(display, "xyuv_tex");
         let fullscreen_quad = vec![ Vertex { pos: [-1.0, -1.0], texpos: [0.0, 1.0]},
                                     Vertex { pos: [1.0, -1.0],  texpos: [1.0, 1.0]},
@@ -36,7 +36,7 @@ where T: Clone + glium::texture::PixelValue {
         let texture_data: Vec<Vec<u8>> = vec!(vec!(0; net.get_size().0); net.get_size().1);
         let texture = glium::texture::Texture2d::new(display, texture_data).unwrap();
 
-        let mut new = Renderer {
+        let mut new = TileNet {
             display: display,
             net: net,
 
