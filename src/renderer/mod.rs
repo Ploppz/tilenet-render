@@ -11,7 +11,7 @@ use tile_net::TileNet;
 
 
 pub struct Renderer<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
-    display: &'a Display,
+    display: Display,
     net: &'a TileNet<T>,
 
     // OpenGL 
@@ -22,8 +22,8 @@ pub struct Renderer<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
 
 impl<'a, T> Renderer<'a, T>
 where T: Clone + glium::texture::PixelValue {
-    pub fn new(display: &'a Display, net: &'a TileNet<T>) -> Renderer<'a, T> {
-        let shader_prg = create_program(display, "xyuv_tex");
+    pub fn new(display: Display, net: &'a TileNet<T>) -> Renderer<'a, T> {
+        let shader_prg = create_program(&display, "xyuv_tex");
         let fullscreen_quad = vec![ Vertex { pos: [-1.0, -1.0], texpos: [0.0, 1.0]},
                                     Vertex { pos: [1.0, -1.0],  texpos: [1.0, 1.0]},
                                     Vertex { pos: [1.0, 1.0],   texpos: [1.0, 0.0]},
@@ -32,9 +32,9 @@ where T: Clone + glium::texture::PixelValue {
                                     Vertex { pos: [-1.0, 1.0],  texpos: [0.0, 0.0]},
                                     Vertex { pos: [-1.0, -1.0], texpos: [0.0, 1.0]}];
 
-        let quad_vbo = ::glium::VertexBuffer::new(display, &fullscreen_quad).unwrap();
+        let quad_vbo = ::glium::VertexBuffer::new(&display, &fullscreen_quad).unwrap();
         let texture_data: Vec<Vec<u8>> = vec!(vec!(0; net.get_size().0); net.get_size().1);
-        let texture = glium::texture::Texture2d::new(display, texture_data).unwrap();
+        let texture = glium::texture::Texture2d::new(&display, texture_data).unwrap();
 
         let mut new = Renderer {
             display: display,
@@ -48,11 +48,7 @@ where T: Clone + glium::texture::PixelValue {
         new
     }
 
-    pub fn render(&mut self, left: f32, top: f32, width: u32, height: u32) {
-        let mut target = self.display.draw();        // target: glium::Frame
-        target.clear_color(0.0, 0.0, 0.0, 1.0);
-
-        // RENDER 
+    pub fn render(&mut self, target: &mut glium::Frame, left: f32, top: f32, width: u32, height: u32) {
 
         let tex_left = left / (self.net.get_size().0 as f32);
         let tex_top = top / (self.net.get_size().1 as f32);
@@ -69,8 +65,6 @@ where T: Clone + glium::texture::PixelValue {
 
 
         // END
-
-        target.finish().unwrap(); 
     }
 
     fn upload_texture(&mut self) {
