@@ -3,3 +3,5 @@ extern crate tile_net;
 extern crate glium;
 
 pub mod renderer;
+
+pub use renderer::Renderer as Ren;

@@ -10,9 +10,10 @@ use glium::texture::{ Texture2d, ClientFormat, RawImage2d };
 use tile_net;
 
 
-pub struct TileNet<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
-    display: &'a Display,
-    net: &'a tile_net::TileNet<T>,
+pub struct Renderer {
+    display: Display,
+    net_width: usize,
+    net_height: usize,
 
     // OpenGL 
     shader_prg: glium::Program,
@@ -20,64 +21,62 @@ pub struct TileNet<'a, T> where T: 'a + Clone + glium::texture::PixelValue {
     texture: Texture2d,
 }
 
-impl<'a, T> TileNet<'a, T>
-where T: Clone + glium::texture::PixelValue {
-    pub fn new(display: &'a Display, net: &'a tile_net::TileNet<T>) -> TileNet<'a, T> {
-        let shader_prg = create_program(display, "xyuv_tex");
-        let fullscreen_quad = vec![ Vertex { pos: [-1.0, -1.0], texpos: [0.0, 1.0]},
-                                    Vertex { pos: [1.0, -1.0],  texpos: [1.0, 1.0]},
-                                    Vertex { pos: [1.0, 1.0],   texpos: [1.0, 0.0]},
+impl Renderer {
+    pub fn new<T>(display: Display, net: &TileNet<T>) -> Renderer
+    where T: Clone + glium::texture::PixelValue {
 
-                                    Vertex { pos: [1.0, 1.0],   texpos: [1.0, 0.0]},
-                                    Vertex { pos: [-1.0, 1.0],  texpos: [0.0, 0.0]},
-                                    Vertex { pos: [-1.0, -1.0], texpos: [0.0, 1.0]}];
+        let vert_src = include_str!("../../shaders/xyuv_tex.vert");
+        let frag_src = include_str!("../../shaders/xyuv_tex.frag");
+        let shader_prg = glium::Program::from_source(&display, vert_src, frag_src, None).unwrap();
+        let fullscreen_quad = vec![ Vertex { pos: [-1.0, -1.0]},
+                                    Vertex { pos: [1.0, -1.0]},
+                                    Vertex { pos: [1.0, 1.0]},
 
-        let quad_vbo = ::glium::VertexBuffer::new(display, &fullscreen_quad).unwrap();
+                                    Vertex { pos: [1.0, 1.0]},
+                                    Vertex { pos: [-1.0, 1.0]},
+                                    Vertex { pos: [-1.0, -1.0]}];
+
+        let quad_vbo = ::glium::VertexBuffer::new(&display, &fullscreen_quad).unwrap();
         let texture_data: Vec<Vec<u8>> = vec!(vec!(0; net.get_size().0); net.get_size().1);
-        let texture = glium::texture::Texture2d::new(display, texture_data).unwrap();
+        let texture = glium::texture::Texture2d::new(&display, texture_data).unwrap();
 
         let mut new = TileNet {
             display: display,
-            net: net,
+            net_width: net.get_size().0,
+            net_height: net.get_size().1,
 
             shader_prg: shader_prg,
             quad_vbo: quad_vbo,
             texture: texture,
         };
-        new.upload_texture();
+        new.upload_texture(net);
         new
     }
 
-    pub fn render(&mut self, left: f32, top: f32, width: u32, height: u32) {
-        let mut target = self.display.draw();        // target: glium::Frame
-        target.clear_color(0.0, 0.0, 0.0, 1.0);
-
-        // RENDER 
-
-        let tex_left = left / (self.net.get_size().0 as f32);
-        let tex_top = top / (self.net.get_size().1 as f32);
-        let tex_width = (width as f32) / (self.net.get_size().0 as f32);
-        let tex_height = (height as f32) / (self.net.get_size().1 as f32);
+    pub fn render(&mut self, target: &mut glium::Frame, center_x: f32, center_y: f32, zoom: f32, width: u32, height: u32) {
 
         let uniforms = uniform! (
-            sampler: glium::uniforms::Sampler::new(&self.texture).wrap_function(glium::uniforms::SamplerWrapFunction::Clamp),
-            tex_lefttop: [tex_left, tex_top],
-            tex_size: [tex_width, tex_height],
+            sampler: glium::uniforms::Sampler::new(&self.texture)
+                    .wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
+                    .minify_filter(glium::uniforms::MinifySamplerFilter::Nearest)
+                    .magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest),
+            view_size: [width as f32 / zoom, height as f32 / zoom],
+            tex_size: [self.net_width as f32, self.net_height as f32],
+            screen_center: [center_x, center_y],
         );
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
         target.draw(self.quad_vbo.slice(0..6).unwrap(), indices, &self.shader_prg, &uniforms, &Default::default()).unwrap();
 
 
         // END
-
-        target.finish().unwrap(); 
     }
 
-    fn upload_texture(&mut self) {
-        let net_size = self.net.get_size();
-        let upload_area = glium::Rect { left: 0, bottom: 0, width: self.net.get_size().0 as u32, height: self.net.get_size().1 as u32};
+    fn upload_texture<T>(&mut self, net: &TileNet<T>)
+        where T: Clone + glium::texture::PixelValue {
+        let net_size = net.get_size();
+        let upload_area = glium::Rect { left: 0, bottom: 0, width: net.get_size().0 as u32, height: net.get_size().1 as u32};
         let upload_data = RawImage2d {
-            data: Cow::Borrowed(self.net.get_raw()),
+            data: Cow::Borrowed(net.get_raw()),
             width: net_size.0 as u32,
             height: net_size.1 as u32,
             format: ClientFormat::U8,
@@ -86,30 +85,12 @@ where T: Clone + glium::texture::PixelValue {
 
         self.texture.write(upload_area, upload_data);
     }
-
 }
 
 // For rendering
 #[derive(Copy, Clone)]
 struct Vertex {
     pos: [f32; 2],
-    texpos: [f32; 2],
 }
 
-implement_vertex!(Vertex, pos, texpos);
-
-
-//// Helpers ////
-pub fn create_program<F>(display: &F, name: &'static str) -> glium::Program
-    where F: glium::backend::Facade
-{
-    let mut f = File::open("shaders/".to_string() + name + ".vert").unwrap();
-    let mut vert_src = String::new();
-    let _ = f.read_to_string(&mut vert_src);
-    let _ = f = File::open("shaders/".to_string() + name + ".frag").unwrap();
-    let mut frag_src = String::new();
-    let _ = f.read_to_string(&mut frag_src);
-
-    glium::Program::from_source(display, vert_src.as_str(), frag_src.as_str(), None).unwrap()
-}
-
+implement_vertex!(Vertex, pos);
