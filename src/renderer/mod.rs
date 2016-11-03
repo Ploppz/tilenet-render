@@ -7,7 +7,7 @@ use glium;
 use glium::{ Display, Surface };
 use glium::texture::{ Texture2d, ClientFormat, RawImage2d };
 
-use tile_net;
+use tile_net::TileNet;
 
 
 pub struct Renderer {
@@ -40,7 +40,7 @@ impl Renderer {
         let texture_data: Vec<Vec<u8>> = vec!(vec!(0; net.get_size().0); net.get_size().1);
         let texture = glium::texture::Texture2d::new(&display, texture_data).unwrap();
 
-        let mut new = TileNet {
+        let mut new = Renderer {
             display: display,
             net_width: net.get_size().0,
             net_height: net.get_size().1,
