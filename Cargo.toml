@@ -6,5 +6,5 @@ authors = ["Erlend Hofstad Langseth <3rlendhl@gmail.com>"]
 license = "GPL-3.0"
 
 [dependencies]
-tile_net = "2"
+tile_net = { git = "https://github.com/BourgondAries/TileNet" }
 glium = "0.15.0"
