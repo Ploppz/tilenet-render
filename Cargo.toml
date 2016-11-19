@@ -1,10 +1,15 @@
 [package]
 name = "tilenet_ren"
-version = "0.2.0"
+version = "0.3.0"
 description = "Render tile_net using glium. Currently just a special case where each tile is a u8 pixel."
 authors = ["Erlend Hofstad Langseth <3rlendhl@gmail.com>"]
 license = "GPL-3.0"
 
 [dependencies]
-tile_net = { git = "https://github.com/BourgondAries/TileNet" }
+clippy = { version = "0.0", optional = true }
 glium = "0.15.0"
+tile_net = { git = "https://github.com/BourgondAries/TileNet" }
+
+[features]
+default = []
+dev = ["clippy"]

@@ -1,7 +1,10 @@
-extern crate tile_net;
+#![cfg_attr(feature = "dev", allow(unstable_features))]
+#![cfg_attr(feature = "dev", feature(plugin))]
+#![cfg_attr(feature = "dev", plugin(clippy))]
+
 #[macro_use]
 extern crate glium;
+extern crate tile_net;
 
 pub mod renderer;
-
 pub use renderer::Renderer as Ren;
