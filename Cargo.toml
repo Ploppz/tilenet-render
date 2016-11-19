@@ -1,10 +1,10 @@
 [package]
 name = "tilenet_ren"
-version = "0.1.0"
+version = "0.2.0"
 description = "Render tile_net using glium. Currently just a special case where each tile is a u8 pixel."
 authors = ["Erlend Hofstad Langseth <3rlendhl@gmail.com>"]
 license = "GPL-3.0"
 
 [dependencies]
-tile_net = "1.2.3"
+tile_net = "2"
 glium = "0.15.0"

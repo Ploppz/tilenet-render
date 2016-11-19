@@ -15,7 +15,7 @@ pub struct Renderer {
     net_width: usize,
     net_height: usize,
 
-    // OpenGL 
+    // OpenGL
     shader_prg: glium::Program,
     quad_vbo: glium::VertexBuffer<Vertex>,
     texture: Texture2d,
