@@ -4,7 +4,6 @@ use glium::texture::{Texture2d, ClientFormat, RawImage2d};
 use std::borrow::Cow;
 use tile_net::TileNet;
 
-
 pub struct Renderer {
     net_width: usize,
     net_height: usize,
@@ -13,6 +12,8 @@ pub struct Renderer {
     shader_prg: glium::Program,
     quad_vbo: glium::VertexBuffer<Vertex>,
     texture: Texture2d,
+    // Uniforms/config
+    bg_col: [f32; 3],
 }
 
 impl Renderer {
@@ -42,9 +43,14 @@ impl Renderer {
             shader_prg: shader_prg,
             quad_vbo: quad_vbo,
             texture: texture,
+
+            bg_col: [0.5, 0.5, 0.5],
         };
         new.upload_texture(net);
         new
+    }
+    pub fn set_bg_col(&mut self, r: f32, g: f32, b: f32) {
+        self.bg_col = [r, g, b];
     }
 
     pub fn render(&mut self,
@@ -62,6 +68,7 @@ impl Renderer {
             view_size: [width as f32 / zoom, height as f32 / zoom],
             tex_size: [self.net_width as f32, self.net_height as f32],
             screen_center: [center.0, center.1],
+            bg_col: self.bg_col,
         );
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
         target.draw(self.quad_vbo.slice(0..6).unwrap(),
