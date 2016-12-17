@@ -4,6 +4,10 @@ use glium::texture::{Texture2d, ClientFormat, RawImage2d};
 use std::borrow::Cow;
 use tile_net::TileNet;
 
+// Re-export for configuration
+pub use glium::uniforms::MinifySamplerFilter;
+pub use glium::uniforms::MagnifySamplerFilter;
+
 pub struct Renderer {
     net_width: usize,
     net_height: usize,
@@ -14,6 +18,8 @@ pub struct Renderer {
     texture: Texture2d,
     // Uniforms/config
     bg_col: [f32; 3],
+    minify_filter: MinifySamplerFilter,
+    magnify_filter: MagnifySamplerFilter,
 }
 
 impl Renderer {
@@ -45,12 +51,20 @@ impl Renderer {
             texture: texture,
 
             bg_col: [0.5, 0.5, 0.5],
+            minify_filter: MinifySamplerFilter::Nearest,
+            magnify_filter: MagnifySamplerFilter::Nearest,
         };
         new.upload_texture(net);
         new
     }
     pub fn set_bg_col(&mut self, r: f32, g: f32, b: f32) {
         self.bg_col = [r, g, b];
+    }
+    pub fn set_minify_filter(&mut self, filter: MinifySamplerFilter) {
+        self.minify_filter = filter;
+    }
+    pub fn set_magnify_filter(&mut self, filter: MagnifySamplerFilter) {
+        self.magnify_filter = filter;
     }
 
     pub fn render(&mut self,
@@ -63,8 +77,8 @@ impl Renderer {
         let uniforms = uniform! (
             sampler: glium::uniforms::Sampler::new(&self.texture)
                     .wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
-                    .minify_filter(glium::uniforms::MinifySamplerFilter::Nearest)
-                    .magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest),
+                    .minify_filter(self.minify_filter)
+                    .magnify_filter(self.magnify_filter),
             view_size: [width as f32 / zoom, height as f32 / zoom],
             tex_size: [self.net_width as f32, self.net_height as f32],
             screen_center: [center.0, center.1],
