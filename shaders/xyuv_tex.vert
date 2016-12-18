@@ -4,6 +4,7 @@ in vec2 pos;
 /* in vec2 texpos; */
 
 out vec2 f_texpos; // fragment texture position
+out vec2 f_next_texpos; // with x+1,y+1 in pixel coords
 
 /* uniform vec2 tex_lefttop; */
 /* uniform vec2 tex_size; */
@@ -18,5 +19,6 @@ void main() {
     /* f_texpos = tex_lefttop + tex_size * texpos; */
 
     f_texpos = (screen_center + view_size/2.0 * pos) / tex_size;
+    f_next_texpos = (screen_center + view_size/2.0 * (pos+1)) / tex_size;
     gl_Position = vec4(pos, 0, 1);
 }
