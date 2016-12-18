@@ -103,8 +103,8 @@ impl Renderer {
         let upload_area = glium::Rect {
             left: 0,
             bottom: 0,
-            width: net.get_size().0 as u32,
-            height: net.get_size().1 as u32,
+            width: net_size.0 as u32,
+            height: net_size.1 as u32,
         };
         let upload_data = RawImage2d {
             data: Cow::Borrowed(net.get_raw()),
