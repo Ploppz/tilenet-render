@@ -80,7 +80,7 @@ impl Renderer {
                     .minify_filter(self.minify_filter)
                     .magnify_filter(self.magnify_filter),
             view_size: [width as f32 / zoom, height as f32 / zoom],
-            tex_size: [self.net_width as f32, self.net_height as f32],
+            texsize: [self.net_width as f32, self.net_height as f32],
             screen_center: [center.0, center.1],
             bg_col: self.bg_col,
         );
