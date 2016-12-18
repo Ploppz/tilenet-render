@@ -13,9 +13,9 @@ void main() {
     // Supersample
     float intensity =
           texture(sampler, f_texpos).x
-        + texture(sampler, vec2(f_texpos.x, f_next_texpos.y))
-        + texture(sampler, vec2(f_next_texpos.x, f_next_texpos.y))
-        + texture(sampler, vec2(f_next_texpos.x, f_texpos.y));
+        + texture(sampler, vec2(f_texpos.x, f_next_texpos.y)).x
+        + texture(sampler, vec2(f_next_texpos.x, f_next_texpos.y)).x
+        + texture(sampler, vec2(f_next_texpos.x, f_texpos.y)).x;
 
     vec3 tex_col = vec3(intensity);
 
