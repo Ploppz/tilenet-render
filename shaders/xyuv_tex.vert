@@ -19,6 +19,6 @@ void main() {
     /* f_texpos = tex_lefttop + tex_size * texpos; */
 
     f_texpos = (screen_center + view_size/2.0 * pos) / tex_size;
-    f_next_texpos = (screen_center + view_size/2.0 * (pos+1)) / tex_size;
+    f_next_texpos = (screen_center + view_size/2.0 * vec2(pos.x+1.0, pos.y+1.0)) / tex_size;
     gl_Position = vec4(pos, 0, 1);
 }
