@@ -20,6 +20,7 @@ pub struct Renderer {
     bg_col: [f32; 3],
     minify_filter: MinifySamplerFilter,
     magnify_filter: MagnifySamplerFilter,
+    smooth: bool,
 }
 
 impl Renderer {
@@ -53,6 +54,7 @@ impl Renderer {
             bg_col: [0.5, 0.5, 0.5],
             minify_filter: MinifySamplerFilter::Nearest,
             magnify_filter: MagnifySamplerFilter::Nearest,
+            smooth: true,
         };
         new.upload_texture(net);
         new
@@ -65,6 +67,15 @@ impl Renderer {
     }
     pub fn set_magnify_filter(&mut self, filter: MagnifySamplerFilter) {
         self.magnify_filter = filter;
+    }
+    pub fn set_smooth(&mut self, to: bool) {
+        self.smooth = to;
+    }
+    pub fn get_smooth(&mut self) -> bool{
+        self.smooth
+    }
+    pub fn toggle_smooth(&mut self) {
+        self.smooth = !self.smooth;
     }
 
     pub fn render(&mut self,
@@ -83,6 +94,7 @@ impl Renderer {
             texsize: [self.net_width as f32, self.net_height as f32],
             screen_center: [center.0, center.1],
             bg_col: self.bg_col,
+            smooth_: self.smooth,
         );
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
         target.draw(self.quad_vbo.slice(0..6).unwrap(),
