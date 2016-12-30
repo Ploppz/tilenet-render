@@ -15,6 +15,7 @@ void main() {
     if (smooth_) {
         vec2 step = vec2(dFdx(texpos.x), dFdy(texpos.y));
 
+        vec2 texpos = texpos - 1.0;
         vec2 t = fract(texpos) / step;
         t = clamp(t, 0, 1);
 
