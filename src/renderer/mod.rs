@@ -3,6 +3,7 @@ use glium::{Display, Surface};
 use glium::texture::{Texture2d, ClientFormat, RawImage2d};
 use std::borrow::Cow;
 use tile_net::TileNet;
+use std;
 
 // Re-export for configuration
 pub use glium::uniforms::MinifySamplerFilter;
@@ -24,9 +25,7 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn new<T>(display: Display, net: &TileNet<T>) -> Renderer
-        where T: Clone + glium::texture::PixelValue
-    {
+    pub fn new(display: Display, net: &TileNet<u8>) -> Renderer {
 
         let vert_src = include_str!("../../shaders/xyuv_tex.vert");
         let frag_src = include_str!("../../shaders/xyuv_tex.frag");
@@ -56,7 +55,7 @@ impl Renderer {
             magnify_filter: MagnifySamplerFilter::Nearest,
             smooth: true,
         };
-        new.upload_texture(net);
+        new.upload_entire_texture(net);
         new
     }
     pub fn set_bg_col(&mut self, r: f32, g: f32, b: f32) {
@@ -108,20 +107,25 @@ impl Renderer {
         // END
     }
 
-    fn upload_texture<T>(&mut self, net: &TileNet<T>)
-        where T: Clone + glium::texture::PixelValue
-    {
+    pub fn upload_entire_texture(&mut self, net: &TileNet<u8>) {
         let net_size = net.get_size();
+        self.upload_texture(net, 0, 0, net_size.0 as u32, net_size.1 as u32);
+    }
+    pub fn upload_texture(&mut self, net: &TileNet<u8>, left: u32, bottom: u32, width: u32, height: u32) {
         let upload_area = glium::Rect {
-            left: 0,
-            bottom: 0,
-            width: net_size.0 as u32,
-            height: net_size.1 as u32,
+            left: left,
+            bottom: bottom,
+            width: width,
+            height: height,
         };
+
+        let pixels: Vec<u8> = net.view_box((left as usize, (left+width)as usize, bottom as usize, (bottom+height) as usize)).map(|x| *x.0).collect();
+        assert!(pixels.len() == (width * height) as usize);
+
         let upload_data = RawImage2d {
-            data: Cow::Borrowed(net.get_raw()),
-            width: net_size.0 as u32,
-            height: net_size.1 as u32,
+            data: Cow::Borrowed(&pixels),
+            width: width,
+            height: height,
             format: ClientFormat::U8,
         };
 
