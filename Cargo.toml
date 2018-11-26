@@ -8,8 +8,7 @@ license = "GPL-3.0"
 [dependencies]
 clippy = { version = "0.0", optional = true }
 glium = "0.15.0"
-# tile_net = { git = "https://github.com/Ploppz/TileNet" }
-tilenet = { path = "/home/ploppz/code/rust/tilenet" }
+tilenet = { git = "https://github.com/Ploppz/TileNet", branch = "flagged-storage" }
 
 [features]
 default = []
