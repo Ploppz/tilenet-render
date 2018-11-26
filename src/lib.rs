@@ -4,7 +4,7 @@
 
 #[macro_use]
 extern crate glium;
-extern crate tile_net;
+extern crate tilenet;
 
 pub mod renderer;
 pub use renderer::Renderer as Ren;

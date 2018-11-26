@@ -2,8 +2,7 @@ use glium;
 use glium::{Display, Surface};
 use glium::texture::{Texture2d, ClientFormat, RawImage2d};
 use std::borrow::Cow;
-use tile_net::TileNet;
-use std;
+use tilenet::TileNet;
 
 // Re-export for configuration
 pub use glium::uniforms::MinifySamplerFilter;
